@@ -1,0 +1,22 @@
+.tmp
+*~
+Make*
+*.pro.user*
+.*.swp
+
+#Mac OSX
+*.app
+*.pbproj
+*.xcodeproj
+Info.plist
+
+#Unix
+*.[oa]
+moc_*
+ui_*
+qrc_*
+
+#Windows
+*.dll
+*.exe
+Thumbs.db

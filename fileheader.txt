@@ -1,7 +1,7 @@
 /*!
-   \file
+   \file 
    \author Dane Gardner <dane.gardner@gmail.com>
-   \version
+   \version 
 
    \section LICENSE
    This file is part of the Serene 3D Graphing Library
@@ -24,24 +24,3 @@
    \section DESCRIPTION
 
  */
-
-#include "DataSeries.h"
-
-DataSeries::DataSeries(GraphWidget *parent) :
-    GraphPrimitive(parent),
-    m_Column(-1)
-{
-}
-
-void DataSeries::init(int column)
-{
-    /* IMPLEMENT IN A SUBCLASS; Don't forget to call this base method, though. */
-
-    m_Column = column;
-    GraphPrimitive::init();
-}
-
-int DataSeries::column()
-{
-    return m_Column;
-}
