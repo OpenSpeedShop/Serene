@@ -15,35 +15,38 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-QT       += core gui opengl
+QT           += core gui opengl
 
-TARGET    = OpenGL
-TEMPLATE  = app
+TARGET        = OpenGL
 
-SOURCES  += main.cpp\
-            MainWindow.cpp \
-            AbstractGraph/GridLine.cpp \
-            AbstractGraph/GraphWidget.cpp \
-            AbstractGraph/DataSeries.cpp \
-            GraphView.cpp \
-            AbstractGraph/GraphPrimitive.cpp \
-            LineGraph/LineDataSeries.cpp \
-            LineGraph/LineGraphWidget.cpp \
-            Graph2D/GraphWidget2D.cpp \
-            Graph3D/GraphWidget3D.cpp
+TEMPLATE      = app
 
-HEADERS  += MainWindow.h \
-            AbstractGraph/GridLine.h \
-            AbstractGraph/GraphWidget.h \
-            AbstractGraph/DataSeries.h \
-            GraphView.h \
-            AbstractGraph/GraphPrimitive.h \
-            LineGraph/LineDataSeries.h \
-            LineGraph/LineGraphWidget.h \
-            Graph2D/GraphWidget2D.h \
-            Graph3D/GraphWidget3D.h
+SOURCES      += main.cpp\
+                MainWindow.cpp \
+                GraphView.cpp \
+                AbstractGraph/GridLine.cpp \
+                AbstractGraph/GraphWidget.cpp \
+                AbstractGraph/DataSeries.cpp \
+                AbstractGraph/GraphPrimitive.cpp \
+                Graph2D/GraphWidget2D.cpp \
+                Graph3D/GraphWidget3D.cpp \
+                LineGraph/LineDataSeries.cpp \
+                LineGraph/LineGraphWidget.cpp \
+    AbstractGraph/Camera.cpp
 
-FORMS    += MainWindow.ui
+HEADERS      += MainWindow.h \
+                GraphView.h \
+                AbstractGraph/GridLine.h \
+                AbstractGraph/GraphWidget.h \
+                AbstractGraph/DataSeries.h \
+                AbstractGraph/GraphPrimitive.h \
+                Graph2D/GraphWidget2D.h \
+                Graph3D/GraphWidget3D.h \
+                LineGraph/LineDataSeries.h \
+                LineGraph/LineGraphWidget.h \
+    AbstractGraph/Camera.h
+
+FORMS        += MainWindow.ui
 
 OTHER_FILES  += README \
                 LICENSE \

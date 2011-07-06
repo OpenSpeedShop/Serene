@@ -28,7 +28,7 @@
 #include "GridLine.h"
 #include "GraphWidget.h"
 
-GridLine::GridLine(GraphWidget *parent) :
+GridLine::GridLine(QObject *parent) :
     GraphPrimitive(parent)
 {
 }
@@ -99,7 +99,6 @@ void GridLine::init()
         }
         glEnd();
     }
-
 
     /* Box */
 //    // Bottom square

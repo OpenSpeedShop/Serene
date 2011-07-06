@@ -28,10 +28,13 @@
 #include "GraphPrimitive.h"
 #include "GraphWidget.h"
 
-GraphPrimitive::GraphPrimitive(GraphWidget *parent) :
+GraphPrimitive::GraphPrimitive(QObject *parent) :
     QObject(parent),
     m_Initialized(false),
-    m_ListId(0)
+    m_ListId(0),
+    m_Orientation(),
+    m_Location(),
+    m_Scale(1.0,1.0,1.0)
 {
 }
 
@@ -49,12 +52,25 @@ void GraphPrimitive::paint()
         init();
     }
 
-    glCallList(listId());
-}
+    glPushMatrix();
 
-GraphWidget *GraphPrimitive::parentGraphWidget()
-{
-    return qobject_cast<GraphWidget *>(parent());
+    QMatrix4x4 matrix;
+    matrix.translate(location());
+    matrix.rotate(orientation());
+    matrix.scale(scale());
+    if(sizeof(qreal) == sizeof(GLdouble)) {
+        glMultMatrixd((GLdouble *)matrix.constData());
+    } else {
+        glMultMatrixf((GLfloat *)matrix.constData());
+    }
+
+    glCallList(listId());
+
+    foreach(GraphPrimitive *primitive, m_Children) {
+        primitive->paint();
+    }
+
+    glPopMatrix();
 }
 
 bool GraphPrimitive::isValid()
@@ -70,5 +86,35 @@ void GraphPrimitive::setListId(GLuint listId)
 GLuint GraphPrimitive::listId()
 {
     return m_ListId;
+}
+
+const QQuaternion &GraphPrimitive::orientation() const
+{
+    return m_Orientation;
+}
+
+void GraphPrimitive::setOrientation(const QQuaternion &orientation)
+{
+    m_Orientation = orientation;
+}
+
+const QVector3D &GraphPrimitive::location() const
+{
+    return m_Location;
+}
+
+void GraphPrimitive::setLocation(const QVector3D &location)
+{
+    m_Location = location;
+}
+
+const QVector3D &GraphPrimitive::scale() const
+{
+    return m_Scale;
+}
+
+void GraphPrimitive::setScale(const QVector3D &scale)
+{
+    m_Scale = scale;
 }
 

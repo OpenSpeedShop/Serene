@@ -37,7 +37,7 @@ class GraphWidget2D : public GraphWidget
 public:
     explicit GraphWidget2D(QWidget *parent = 0);
 
-    virtual bool is3Dimensional() { return false; }
+    virtual bool is3Dimensional();
 
 protected:
     virtual void init();

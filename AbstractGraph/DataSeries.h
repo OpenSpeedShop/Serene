@@ -36,7 +36,7 @@ class DataSeries : public GraphPrimitive
 {
     Q_OBJECT
 public:
-    explicit DataSeries(GraphWidget *parent);
+    explicit DataSeries(QObject *parent = 0);
 
     virtual void init(int column);
     int column();

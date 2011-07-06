@@ -27,7 +27,7 @@
 
 #include "DataSeries.h"
 
-DataSeries::DataSeries(GraphWidget *parent) :
+DataSeries::DataSeries(QObject *parent) :
     GraphPrimitive(parent),
     m_Column(-1)
 {

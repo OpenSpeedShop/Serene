@@ -30,8 +30,8 @@
 
 #include <QGLWidget>
 #include <QVector3D>
-#include <QAbstractItemModel>
 #include "GraphPrimitive.h"
+#include "Camera.h"
 
 class GraphWidget : public QGLWidget
 {
@@ -43,17 +43,7 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    QAbstractItemModel *model();
-    void setModel(QAbstractItemModel *model);
-
-    QVector3D rotation() const;
-    void setRotation(const QVector3D &rotation);
-    QVector3D translation()const;
-    void setTranslation(const QVector3D &translation);
-    QVector3D scale() const;
-    void setScale(const QVector3D &scale);
-
-    virtual bool is3Dimensional() { return true; }
+    virtual bool is3Dimensional();
 
 protected:
     virtual void initializeGL();
@@ -70,13 +60,8 @@ protected:
     QList<GraphPrimitive *> m_Primitives;
 
 private:
-    QAbstractItemModel *m_Model;
-
-    QVector3D m_Rotation;
-    QVector3D m_Translation;
-    QVector3D m_Scale;
     QPoint m_LastMousePosition;
-
+    Camera m_Camera;
 };
 
 #endif // GLWIDGET_H

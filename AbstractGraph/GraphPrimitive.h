@@ -37,19 +37,34 @@ class GraphPrimitive : public QObject
 {
     Q_OBJECT
 public:
-    explicit GraphPrimitive(GraphWidget *parent);
+    explicit GraphPrimitive(QObject *parent = 0);
     virtual void init();
     virtual void paint();
     bool isValid();
 
+    const QQuaternion &orientation() const;
+    void setOrientation(const QQuaternion &orientation);
+    const QVector3D &location() const;
+    void setLocation(const QVector3D &location);
+    const QVector3D &scale() const;
+    void setScale(const QVector3D &scale);
+
+    QList<GraphPrimitive *> m_Children;
+
 protected:
-    GraphWidget *parentGraphWidget();
     void setListId(GLuint listId);
     GLuint listId();
 
 private:
     bool m_Initialized;
     GLuint m_ListId;
+
+    QMatrix4x4 m_Matrix;
+
+    QQuaternion m_Orientation;
+    QVector3D m_Location;
+    QVector3D m_Scale;
+
 };
 
 #endif // GRAPHPRIMITIVE_H

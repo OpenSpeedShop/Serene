@@ -28,7 +28,7 @@
 #include "LineDataSeries.h"
 #include "AbstractGraph/GraphWidget.h"
 
-LineDataSeries::LineDataSeries(GraphWidget *parent) :
+LineDataSeries::LineDataSeries(QObject *parent) :
     DataSeries(parent)
 {
 }

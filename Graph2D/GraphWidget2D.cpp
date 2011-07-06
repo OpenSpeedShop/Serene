@@ -28,9 +28,14 @@
 #include "GraphWidget2D.h"
 
 GraphWidget2D::GraphWidget2D(QWidget *parent) :
-    GraphWidget(parent),
-    m_GridLine(this)
+    GraphWidget(parent)
 {
+}
+
+bool GraphWidget2D::is3Dimensional()
+{
+    return false;
+    return true; //DEBUG:
 }
 
 void GraphWidget2D::init()

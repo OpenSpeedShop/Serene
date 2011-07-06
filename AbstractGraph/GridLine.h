@@ -38,7 +38,7 @@ class GridLine : public GraphPrimitive
 {
     Q_OBJECT
 public:
-    explicit GridLine(GraphWidget *parent = 0);
+    explicit GridLine(QObject *parent = 0);
     void init();
 };
 

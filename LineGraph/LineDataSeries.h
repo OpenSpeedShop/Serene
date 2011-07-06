@@ -36,7 +36,7 @@ class LineDataSeries : public DataSeries
 {
     Q_OBJECT
 public:
-    explicit LineDataSeries(GraphWidget *parent = 0);
+    explicit LineDataSeries(QObject *parent = 0);
 
     void init(int column);
 };

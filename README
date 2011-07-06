@@ -20,7 +20,11 @@ CONTENTS OF THIS FILE
 
 INTRODUCTION
 ------------
-TODO: Introduction
+I created this library because the available libraries for 3D graphing are all out of date (qwtplot3d was last updated in 2007),
+didn't include standard functionality like tooltips over data points, or were like shooting a mouse with a canon (gnuplot is
+easier in most cases).  For the Open|SpeedShop GUI project we needed a simple graphing library that allowed for creation of
+the standard 2D graphs (bar, column, line, pie) along with 3D graphing support.  In order to make it's appearance seamless
+across all charts, a single library that allowed the 3D graphs to be locked to face forward was the most expedient solution.
 
 
 RELEASES

@@ -37,26 +37,12 @@
 #endif
 
 GraphWidget::GraphWidget(QWidget *parent) :
-    QGLWidget(parent),
-    m_Rotation(0.0,0.0,0.0),
-    m_Translation(-12.5,-5.0,-20.0),
-    m_Scale(1.0,1.0,1.0)
+    QGLWidget(parent)
 {
 }
 
 GraphWidget::~GraphWidget()
 {
-}
-
-QAbstractItemModel *GraphWidget::model()
-{
-    return m_Model;
-}
-
-void GraphWidget::setModel(QAbstractItemModel *model)
-{
-    m_Model = model;
-    initializeGL();
 }
 
 QSize GraphWidget::minimumSizeHint() const
@@ -69,35 +55,40 @@ QSize GraphWidget::sizeHint() const
     return QSize(640, 480);
 }
 
+bool GraphWidget::is3Dimensional()
+{
+    return true;
+}
+
 void GraphWidget::initializeGL()
 {
     qglClearColor(Qt::black);
+
+    m_Camera.setHasPerspective(is3Dimensional());
+    m_Camera.setFarPlane(500.0);
+
+    //TODO: Move the view to center and display the entire object
+    m_Camera.translateLocation(QVector3D(0.0, 0.0, -15.0));
+    m_Camera.translate(QVector3D(12.5, 5.0, 0.0));
+
+    connect(&m_Camera, SIGNAL(viewChanged()), this, SLOT(repaint()));
+
     init();
 }
 
 void GraphWidget::init()
 {
+    glEnable(GL_CULL_FACE);
 }
-
 
 void GraphWidget::paintGL()
 {
     makeCurrent();
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    QVector3D scale = this->scale();
-    glScalef(scale.x(), scale.y(), scale.z());
-
-    QVector3D translation = this->translation();
-    glTranslatef(0.0f, 0.0f, translation.z());
-
-    QVector3D rotation = this->rotation();
-    glRotatef(rotation.x() / 16.0, 1.0f, 0.0f, 0.0f);
-    glRotatef(rotation.y() / 16.0, 0.0f, 1.0f, 0.0f);
-    glRotatef(rotation.z() / 16.0, 0.0f, 0.0f, 1.0f);
-
-    glTranslatef(translation.x(), translation.y(), 0.0);
+    m_Camera.refreshView();
 
     paint();
 }
@@ -113,16 +104,11 @@ void GraphWidget::paint()
 void GraphWidget::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(50.0, (double)width/(double)height, 0.1, 500.0);
-    glMatrixMode(GL_MODELVIEW);
+    m_Camera.setAspectRatio((double)width/(double)height);
 }
 
 void GraphWidget::mousePressEvent(QMouseEvent *event)
 {
-    if(!is3Dimensional()) return;
-
     m_LastMousePosition = event->pos();
 
     event->accept();
@@ -131,29 +117,29 @@ void GraphWidget::mousePressEvent(QMouseEvent *event)
 
 void GraphWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    if(!is3Dimensional()) return;
+    if(event->buttons() != Qt::NoButton) {
+        QVector3D oldPos(m_LastMousePosition.x() - (width() / 2.0), m_LastMousePosition.y() - (height() / 2.0), 0.0);
+        QVector3D newPos(event->x() - (width() / 2.0), event->y() - (height() / 2.0), 0.0);
+        QVector3D delta(oldPos - newPos);
 
-    int dx = event->x() - m_LastMousePosition.x();
-    int dy = event->y() - m_LastMousePosition.y();
-
-#ifdef Q_OS_DARWIN  // Mac hardware doesn't typically have a middle button
-    if(event->buttons() & Qt::RightButton) {
+        if(delta.length() != 0.0) {
+            if(is3Dimensional() &&
+#ifdef Q_OS_DARWIN
+                    event->buttons() == Qt::RightButton &&      // Mac hardware doesn't typically have a middle button
 #else
-    if(event->buttons() & Qt::MidButton) {
+                    event->buttons() == Qt::MidButton &&        // Everybody else does
 #endif
-        if(event->modifiers() == Qt::NoModifier) {
-            QVector3D rotation = this->rotation();
-            rotation.setX(rotation.x() + 8 * dy);
-            rotation.setY(rotation.y() + 8 * dx);
-            setRotation(rotation);
+                    event->modifiers() == Qt::NoModifier) {
+                m_Camera.rotateAboutCenter(delta.y(), delta.x(), 0.0);
 
-        } else if(event->modifiers() == Qt::ControlModifier) {
-            //TODO: Do a "real" translation related to the view area
-            QVector3D translation = this->translation();
-            translation.setX(translation.x() + dx*(-translation.z()/16) / 32.0);
-            translation.setY(translation.y() - dy*(-translation.z()/16) / 32.0);
-            setTranslation(translation);
+            } else if(event->buttons() == Qt::MidButton &&
+                      event->modifiers() == Qt::ControlModifier) {
+                //TODO: Do a direct conversion to projection coordinates, instead of this cludge
+                double x = (delta.x() != 0)? delta.x()/36: 0;
+                double y = (delta.y() != 0)? -delta.y()/36: 0;
+                m_Camera.translate(QVector3D(x, y, 0.0));
 
+            }
         }
     }
 
@@ -163,66 +149,15 @@ void GraphWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GraphWidget::wheelEvent(QWheelEvent *event)
 {
-    if(!is3Dimensional()) return;
-
-    float numDegrees = event->delta() / 8.0f;
-    float numSteps = numDegrees / 15.0f;
-
-    if (event->orientation() == Qt::Vertical) {
-        if(event->modifiers() == Qt::NoModifier) {
-            QVector3D translation = this->translation();
-            translation.setZ(translation.z() + numSteps);
-            setTranslation(translation);
+    if (event->orientation() == Qt::Vertical &&
+            event->modifiers() == Qt::NoModifier) {
+        float numSteps = event->delta() / 120.0f;
+        if((m_Camera.distance() - 1) < numSteps) {      // Don't get too close to the object
+            numSteps = m_Camera.distance() - 1;
         }
+
+        m_Camera.translateLocation(QVector3D(0.0, 0.0, numSteps));
     }
 
     QGLWidget::wheelEvent(event);
-}
-
-QVector3D GraphWidget::rotation() const
-{
-    return m_Rotation;
-}
-
-
-void GraphWidget::setRotation(const QVector3D &rotation)
-{
-    float angle = rotation.x();
-    while(angle < 0) { angle += 360 * 16; }
-    while(angle > 360 * 16) { angle -= 360 * 16; }
-    m_Rotation.setX(angle);
-
-    angle = rotation.y();
-    while(angle < 0) { angle += 360 * 16; }
-    while(angle > 360 * 16) { angle -= 360 * 16; }
-    m_Rotation.setY(angle);
-
-    angle = rotation.z();
-    while(angle < 0) { angle += 360 * 16; }
-    while(angle > 360 * 16) { angle -= 360 * 16; }
-    m_Rotation.setZ(angle);
-
-    repaint();
-}
-
-QVector3D GraphWidget::translation() const
-{
-    return m_Translation;
-}
-
-void GraphWidget::setTranslation(const QVector3D &translation)
-{
-    m_Translation = translation;
-    repaint();
-}
-
-QVector3D GraphWidget::scale() const
-{
-    return m_Scale;
-}
-
-void GraphWidget::setScale(const QVector3D &scale)
-{
-    m_Scale = scale;
-    repaint();
 }
