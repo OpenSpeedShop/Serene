@@ -4,7 +4,7 @@
    \version
 
    \section LICENSE
-   This file is part of the Serene 3D Graphing Library
+   This file is part of the Open|SpeedShop Graphical User Interface
    Copyright (C) 2010-2011 Argo Navis Technologies, LLC
 
    This library is free software; you can redistribute it and/or modify it
@@ -25,25 +25,41 @@
 
  */
 
-#include "GraphWidget2D.h"
+#ifndef GRAPHTEXT_H
+#define GRAPHTEXT_H
 
-GraphWidget2D::GraphWidget2D(QWidget *parent) :
-    GraphWidget(parent)
+#include "GraphPrimitive.h"
+
+class GraphText : public GraphPrimitive
 {
-}
+    Q_OBJECT
+public:
+    explicit GraphText(QObject *parent = 0);
+    virtual ~GraphText();
 
-bool GraphWidget2D::is3Dimensional()
-{
-    return true;
-}
+    virtual void init();
 
-void GraphWidget2D::init()
-{
-    GraphWidget::init();
+    QString text() const;
+    void setText(const QString &text);
 
-    m_GridLine2D.setBoundingCube(&m_BoundingCube);
-    m_GridLine2D.init();
-    if(!m_Primitives.contains(&m_GridLine2D)) {
-        m_Primitives.append(&m_GridLine2D);
-    }
-}
+    QFont font() const;
+    void setFont(const QFont &font);
+
+    QColor color() const;
+    void setColor(const QColor &color);
+
+    double width() const;
+    double height() const;
+
+protected:
+    QRectF boundingBox() const;
+
+private:
+    QString m_Text;
+    QFont m_Font;
+    QColor m_Color;
+    GLuint m_TextureId;
+
+};
+
+#endif // GRAPHTEXT_H

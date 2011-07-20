@@ -38,8 +38,11 @@ class GraphPrimitive : public QObject
     Q_OBJECT
 public:
     explicit GraphPrimitive(QObject *parent = 0);
+    virtual ~GraphPrimitive();
+
     virtual void init();
     virtual void paint();
+    virtual void pick();
     bool isValid();
 
     const QQuaternion &orientation() const;
@@ -52,14 +55,13 @@ public:
     QList<GraphPrimitive *> m_Children;
 
 protected:
+    virtual void pickRender();
     void setListId(GLuint listId);
     GLuint listId();
 
 private:
     bool m_Initialized;
     GLuint m_ListId;
-
-    QMatrix4x4 m_Matrix;
 
     QQuaternion m_Orientation;
     QVector3D m_Location;

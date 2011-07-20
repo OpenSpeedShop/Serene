@@ -38,7 +38,11 @@ class LineDataSeries : public DataSeries
 public:
     explicit LineDataSeries(QObject *parent = 0);
 
-    void init(int column);
+    virtual void init();
+    virtual void pickRender();
+
+protected slots:
+    void rebuild();
 };
 
 #endif // LINESERIES_H

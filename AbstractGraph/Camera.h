@@ -38,7 +38,7 @@ public:
     explicit Camera(QObject *parent = 0);
 
     /* BEGIN VIEW SETTINGS */
-    void rotateAboutCenter(double tilt, double pan, double roll);
+    void rotateAboutCenter(double pan, double tilt, double roll);
     void translateLocation(const QVector3D &translate);
     void translateCenter(const QVector3D &translate);
     void translate(const QVector3D &translate);

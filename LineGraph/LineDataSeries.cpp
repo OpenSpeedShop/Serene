@@ -28,45 +28,162 @@
 #include "LineDataSeries.h"
 #include "AbstractGraph/GraphWidget.h"
 
+#include <QDebug>
+
 LineDataSeries::LineDataSeries(QObject *parent) :
     DataSeries(parent)
 {
 }
 
-void LineDataSeries::init(int column)
+void LineDataSeries::init()
 {
+    if(!isValid()) {
+        connect(this, SIGNAL(columnChanged()), this, SLOT(rebuild()));
+        connect(this, SIGNAL(dataChanged()), this, SLOT(rebuild()));
+        connect(this, SIGNAL(colorChanged()), this, SLOT(rebuild()));
+    }
+
     glEnableClientState(GL_VERTEX_ARRAY);
+
+    if(listId() > 0) {
+        glDeleteLists(listId(), 1);
+        setListId(0);
+    }
 
     setListId(glGenLists(1));
     glNewList(listId(), GL_COMPILE);
 
-    QColor color((Qt::GlobalColor)(Qt::red + column));
+    QColor color = this->color();
     glColor4f(color.redF(), color.greenF(), color.blueF(), color.alphaF());
 
     glLineWidth(2);
-    qsrand(QDateTime::currentMSecsSinceEpoch() * column);
 
-    int points = 100;
-    qreal space = 25.0/points;
+    int points = data().count() - 1;
+    qreal width = boundingCube()->width();
+    qreal height = boundingCube()->height();
+
+    qreal maxValue = boundingCube()->maxValue();
+    qreal minValue = boundingCube()->minValue();
 
     glBegin(GL_LINE_STRIP);
-    float lastValue = (float)((qrand() % 100)/10);
-    for(int index = 0; index < points+1; ++index) {
-        float x = (float)(space * (index));
+    int index = -1;
+    foreach(QVariant dataPoint, data()) {
+        ++index;
 
-        qreal rand = ((qrand() % 100) * 0.025) - 1.25;
-        float y = lastValue + (float)rand;
-        if(y > 10.0) y = 10.0f;
-        else if(y < 0.0) y = 0.0f;
+        bool okay = false;
+        qreal dataValue = dataPoint.toReal(&okay);
 
-        float z = -(float)(column * 0.01);
-        glVertex3f(x,y,z);
+        if(!okay) {
+            dataValue = (qreal(dataPoint.toLongLong(&okay)));
+        }
 
-        lastValue = y;
+        if(!okay) {
+            qWarning("Datapoint not an expected data type");
+            continue;
+        }
+
+        qreal x = (width / points) * index;
+
+        qreal percentOfDelta = (dataValue != minValue)? (dataValue - minValue) / (maxValue - minValue): 0.0;
+        qreal y = height * percentOfDelta;
+
+        qreal z = -(column() * 0.01);
+
+        if(sizeof(qreal) == sizeof(float)) {
+            glVertex3f(x, y, z);
+        } else {
+            glVertex3d(x, y, z);
+        }
+    }
+    glEnd();
+
+    glPointSize(5.0f);
+    glBegin(GL_POINTS);
+    index = -1;
+    foreach(QVariant dataPoint, data()) {
+        ++index;
+
+        bool okay = false;
+        qreal dataValue = dataPoint.toReal(&okay);
+
+        if(!okay) {
+            dataValue = (qreal(dataPoint.toLongLong(&okay)));
+        }
+
+        if(!okay) {
+            qWarning("Datapoint not an expected data type");
+            continue;
+        }
+
+        qreal x = (width / points) * index;
+
+        qreal percentOfDelta = (dataValue != minValue)? (dataValue - minValue) / (maxValue - minValue): 0.0;
+        qreal y = height * percentOfDelta;
+
+        qreal z = -(column() * 0.01);
+
+        if(sizeof(qreal) == sizeof(float)) {
+            glVertex3f(x, y, z);
+        } else {
+            glVertex3d(x, y, z);
+        }
     }
     glEnd();
 
     glEndList();
 
-    DataSeries::init(column);
+    DataSeries::init();
+}
+
+void LineDataSeries::pickRender()
+{
+    int points = data().count() - 1;
+    qreal width = boundingCube()->width();
+    qreal height = boundingCube()->height();
+
+    qreal maxValue = boundingCube()->maxValue();
+    qreal minValue = boundingCube()->minValue();
+
+    glPointSize(7.5f);
+
+    glPushName(column());
+    int index = -1;
+    foreach(QVariant dataPoint, data()) {
+        ++index;
+
+        bool okay = false;
+        qreal dataValue = dataPoint.toReal(&okay);
+
+        if(!okay) {
+            dataValue = (qreal(dataPoint.toLongLong(&okay)));
+        }
+
+        if(!okay) {
+            qWarning("Datapoint not an expected data type");
+            continue;
+        }
+
+        qreal x = (width / points) * index;
+
+        qreal percentOfDelta = (dataValue != minValue)? (dataValue - minValue) / (maxValue - minValue): 0.0;
+        qreal y = height * percentOfDelta;
+
+        qreal z = -(column() * 0.01);
+
+        glPushName(index);
+        glBegin(GL_POINTS);
+        if(sizeof(qreal) == sizeof(float)) {
+            glVertex3f(x, y, z);
+        } else {
+            glVertex3d(x, y, z);
+        }
+        glEnd();
+        glPopName();
+    }
+    glPopName();
+}
+
+void LineDataSeries::rebuild()
+{
+    init();
 }

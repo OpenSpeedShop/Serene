@@ -38,6 +38,14 @@ GraphPrimitive::GraphPrimitive(QObject *parent) :
 {
 }
 
+GraphPrimitive::~GraphPrimitive()
+{
+    if(m_ListId) {
+        glDeleteLists(m_ListId, 1);
+        m_ListId = 0;
+    }
+}
+
 void GraphPrimitive::init()
 {
     /* IMPLEMENT IN A SUBCLASS; Don't forget to call this base method, though. */
@@ -52,6 +60,7 @@ void GraphPrimitive::paint()
         init();
     }
 
+    glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
     QMatrix4x4 matrix;
@@ -73,6 +82,40 @@ void GraphPrimitive::paint()
     glPopMatrix();
 }
 
+void GraphPrimitive::pick()
+{
+    if(!isValid()) {
+        qWarning("GraphPrimitive object picked before initialized.");
+        init();
+    }
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    QMatrix4x4 matrix;
+    matrix.translate(location());
+    matrix.rotate(orientation());
+    matrix.scale(scale());
+    if(sizeof(qreal) == sizeof(GLdouble)) {
+        glMultMatrixd((GLdouble *)matrix.constData());
+    } else {
+        glMultMatrixf((GLfloat *)matrix.constData());
+    }
+
+    pickRender();
+
+    foreach(GraphPrimitive *primitive, m_Children) {
+        primitive->pickRender();
+    }
+
+    glPopMatrix();
+}
+
+void GraphPrimitive::pickRender()
+{
+    //TODO: re-implement for pickable items
+}
+
 bool GraphPrimitive::isValid()
 {
     return m_Initialized;
@@ -80,6 +123,10 @@ bool GraphPrimitive::isValid()
 
 void GraphPrimitive::setListId(GLuint listId)
 {
+    if(m_ListId) {
+        glDeleteLists(m_ListId, 1);
+    }
+
     m_ListId = listId;
 }
 

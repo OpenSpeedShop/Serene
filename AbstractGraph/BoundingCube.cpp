@@ -4,7 +4,7 @@
    \version
 
    \section LICENSE
-   This file is part of the Serene 3D Graphing Library
+   This file is part of the Open|SpeedShop Graphical User Interface
    Copyright (C) 2010-2011 Argo Navis Technologies, LLC
 
    This library is free software; you can redistribute it and/or modify it
@@ -25,25 +25,13 @@
 
  */
 
-#include "GraphWidget2D.h"
+#include "BoundingCube.h"
 
-GraphWidget2D::GraphWidget2D(QWidget *parent) :
-    GraphWidget(parent)
+BoundingCube::BoundingCube(QObject *parent) :
+    QObject(parent),
+    m_Position(0.0,0.0,0.0),
+    m_Size(100.0, 75.0, 100.0),
+    m_MaxValue(75.0),
+    m_MinValue(0.0)
 {
-}
-
-bool GraphWidget2D::is3Dimensional()
-{
-    return true;
-}
-
-void GraphWidget2D::init()
-{
-    GraphWidget::init();
-
-    m_GridLine2D.setBoundingCube(&m_BoundingCube);
-    m_GridLine2D.init();
-    if(!m_Primitives.contains(&m_GridLine2D)) {
-        m_Primitives.append(&m_GridLine2D);
-    }
 }

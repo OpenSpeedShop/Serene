@@ -30,19 +30,36 @@
 
 #include <QObject>
 #include <QtOpenGL>
-#include "GraphPrimitive.h"
+#include "BoundedPrimitive.h"
 
-class DataSeries : public GraphPrimitive
+class DataSeries : public BoundedPrimitive
 {
     Q_OBJECT
 public:
     explicit DataSeries(QObject *parent = 0);
 
-    virtual void init(int column);
-    int column();
+    virtual void init();
+
+    virtual int column();
+    virtual void setColumn(int column);
+
+    QList<QVariant> data() const;
+    void setData(const QList<QVariant> &data);
+
+    QColor color() const;
+    void setColor(const QColor &color);
+
+    void randomizeData(int points = 100);
+
+signals:
+    void dataChanged();
+    void colorChanged();
+    void columnChanged();
 
 private:
     int m_Column;
+    QColor m_Color;
+    QList<QVariant> m_Data;
 
 };
 

@@ -52,21 +52,21 @@ void Camera::refreshView()
     }
 }
 
-void Camera::rotateAboutCenter(double tilt, double pan, double roll)
+void Camera::rotateAboutCenter(double pan, double tilt, double roll)
 {
     QVector3D directionVector = center() - location();
     QVector3D upVector = up();
-
-    if(tilt != 0.0) {
-        QQuaternion tiltQuaternion = QQuaternion::fromAxisAndAngle(QVector3D::crossProduct(directionVector, upVector), tilt);
-        directionVector = tiltQuaternion.rotatedVector(directionVector);
-        upVector = tiltQuaternion.rotatedVector(upVector);
-    }
 
     if(pan != 0.0) {
         QQuaternion panQuaternion = QQuaternion::fromAxisAndAngle(upVector, pan);
         directionVector = panQuaternion.rotatedVector(directionVector);
         upVector = panQuaternion.rotatedVector(upVector);
+    }
+
+    if(tilt != 0.0) {
+        QQuaternion tiltQuaternion = QQuaternion::fromAxisAndAngle(QVector3D::crossProduct(directionVector, upVector), tilt);
+        directionVector = tiltQuaternion.rotatedVector(directionVector);
+        upVector = tiltQuaternion.rotatedVector(upVector);
     }
 
     if(roll != 0.0) {

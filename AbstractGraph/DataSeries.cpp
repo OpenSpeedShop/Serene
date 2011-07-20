@@ -28,20 +28,56 @@
 #include "DataSeries.h"
 
 DataSeries::DataSeries(QObject *parent) :
-    GraphPrimitive(parent),
+    BoundedPrimitive(parent),
     m_Column(-1)
 {
 }
 
-void DataSeries::init(int column)
+void DataSeries::init()
 {
-    /* IMPLEMENT IN A SUBCLASS; Don't forget to call this base method, though. */
-
-    m_Column = column;
-    GraphPrimitive::init();
+    BoundedPrimitive::init();
 }
 
 int DataSeries::column()
 {
     return m_Column;
+}
+
+void DataSeries::setColumn(int column)
+{
+    m_Column = column;
+    emit columnChanged();
+}
+
+
+QList<QVariant> DataSeries::data() const
+{
+    return m_Data;
+}
+
+void DataSeries::setData(const QList<QVariant> &data)
+{
+    m_Data = data;
+    emit dataChanged();
+}
+
+void DataSeries::randomizeData(int points)
+{
+    QList<QVariant> randomData;
+    qsrand(QDateTime::currentMSecsSinceEpoch() * column());
+    for(int index = 0; index < points; ++index) {
+        randomData.append(QVariant((qreal)qrand()));
+    }
+    setData(randomData);
+}
+
+QColor DataSeries::color() const
+{
+    return m_Color;
+}
+
+void DataSeries::setColor(const QColor &color)
+{
+    m_Color = color;
+    emit colorChanged();
 }

@@ -27,10 +27,18 @@
 
 #include "GridLine.h"
 #include "GraphWidget.h"
+#include "GraphText.h"
+
+#include <QDebug>
 
 GridLine::GridLine(QObject *parent) :
-    GraphPrimitive(parent)
+    BoundedPrimitive(parent)
 {
+}
+
+bool GridLine::is3Dimensional()
+{
+    return true;
 }
 
 void GridLine::init()
@@ -51,86 +59,149 @@ void GridLine::init()
     glLineWidth(1);
 
     /* Cross hairs */
+    BoundingCube *boundingCube = this->boundingCube();
+    qreal boundingWidth = boundingCube->width();
+    qreal boundingHeight = boundingCube->height();
+    qreal boundingDepth = boundingCube->depth();
+
     glBegin(GL_LINES);
-    glVertex3d(-1.0f, 0.0f, 0.0f);
-    glVertex3d(25.0f, 0.0f, 0.0f);
-    glVertex3d(0.0f, -1.0f, 0.0f);
-    glVertex3d(0.0f, 10.0f, 0.0f);
-    glVertex3d(0.0f, 0.0f, -5.0f);
-    glVertex3d(0.0f, 0.0f, 1.0f);
+    glVertex3d(0.0, 0.0, 0.0);
+    glVertex3d(boundingWidth, 0.0, 0.0);
+    glVertex3d(0.0, 0.0, 0.0);
+    glVertex3d(0.0, boundingHeight, 0.0);
+    if(is3Dimensional()) {
+        glVertex3d(0.0, 0.0, 0.0);
+        glVertex3d(0.0, 0.0, -boundingDepth);
+    }
     glEnd();
 
-    {
-        int points = 100;
-        qreal space = 25.0/points;
+    int points = xLabels().count() - 1;
+    qreal space = boundingWidth / points;
+    glBegin(GL_LINES);
+    for(int index = 1; index <= points; ++index) {
+        double x = (double)(space * index);
+        glVertex3d(x, -1.5, 0.0);
+        glVertex3d(x, 1.5, 0.0);
+    }
+    glEnd();
+
+    points = yLabels().count() - 1;
+    space = boundingHeight / points;
+    glBegin(GL_LINES);
+    for(int index = 1; index <= points; ++index) {
+        double y = (double)(space * index);
+        glVertex3d(-1.5, y, 0.0);
+        glVertex3d(1.5, y, 0.0);
+    }
+    glEnd();
+
+    if(is3Dimensional()) {
+        points = zLabels().count() - 1;
+        space = boundingHeight / points;
         glBegin(GL_LINES);
-        for(int index = 1; index < points+1; ++index) {
-            float x = (float)(space * (index));
-            float y = 0.0;
-            if((index % 2) == 0) {
-                if((index % 10) == 0) {
-                    y = 0.25;
-                } else {
-                    y = 0.1;
-                }
-            }
-            glVertex3d(x, -y, 0.0);
-            glVertex3d(x, y, 0.0);
+        for(int index = 1; index <= points; ++index) {
+            double z = (double)(space * index);
+            glVertex3d(-1.5, 0.0, z);
+            glVertex3d(1.5, 0.0, z);
         }
         glEnd();
     }
-
-    {
-        int points = 100;
-        qreal space = 10.0/points;
-        glBegin(GL_LINES);
-        for(int index = 1; index < points+1; ++index) {
-            float x = 0.0;
-            if((index % 5) == 0) {
-                if((index % 10) == 0) {
-                    x = 0.25;
-                } else {
-                    x = 0.1;
-                }
-            }
-            float y = (float)(space * (index));
-            glVertex3d(-x, y, 0.0);
-            glVertex3d(x, y, 0.0);
-        }
-        glEnd();
-    }
-
-    /* Box */
-//    // Bottom square
-//    glBegin(GL_LINE_LOOP);
-//    glVertex3f(0.0f,0.0f,0.0f);
-//    glVertex3f(25.0f,0.0f,0.0f);
-//    glVertex3f(25.0f,0.0f,-10.0f);
-//    glVertex3f(0.0f,0.0f,-10.0f);
-//    glEnd();
-
-//    // Top square
-//    glBegin(GL_LINE_LOOP);
-//    glVertex3f(0.0f,10.0f,0.0f);
-//    glVertex3f(25.0f,10.0f,0.0f);
-//    glVertex3f(25.0f,10.0f,-10.0f);
-//    glVertex3f(0.0f,10.0f,-10.0f);
-//    glEnd();
-
-//    // Lines connecting the top and bottom corners
-//    glBegin(GL_LINES);
-//    glVertex3f(0.0f,10.0f,0.0f);
-//    glVertex3f(0.0f,0.0f,0.0f);
-//    glVertex3f(25.0f,10.0f,0.0f);
-//    glVertex3f(25.0f,0.0f,0.0f);
-//    glVertex3f(25.0f,10.0f,-10.0f);
-//    glVertex3f(25.0f,0.0f,-10.0f);
-//    glVertex3f(0.0f,10.0f,-10.0f);
-//    glVertex3f(0.0f,0.0f,-10.0f);
-//    glEnd();
 
     glEndList();
+
+    buildTextLabels();
 
     GraphPrimitive::init();
 }
 
+
+void GridLine::buildTextLabels()
+{
+    /* Build text labels */
+    BoundingCube *boundingCube = this->boundingCube();
+    qreal boundingWidth = boundingCube->width();
+    qreal boundingHeight = boundingCube->height();
+    qreal boundingDepth = boundingCube->depth();
+    qreal textScale = 4.0;
+
+    int labelIndex = 0;
+    int labelCount = xLabels().count() - 1;
+    foreach(QString label, xLabels()) {
+        GraphText *graphText = new GraphText(this);
+        graphText->setText(label);
+
+        qreal x = ((boundingWidth / labelCount) * labelIndex++) - (textScale / 2.0);
+
+        graphText->setLocation(QVector3D(x, -1.0, 0.0));
+        graphText->setOrientation(QQuaternion::fromAxisAndAngle(0.0, 0.0, -1.0, 90));
+        graphText->setScale(QVector3D(textScale, textScale, 0.0));
+
+        graphText->init();
+        m_Children.append(graphText);
+    }
+
+    labelIndex = 0;
+    labelCount = yLabels().count() - 1;
+    foreach(QString label, yLabels()) {
+        GraphText *graphText = new GraphText(this);
+        graphText->setText(label);
+
+        qreal y = ((boundingHeight / labelCount) * (labelIndex++)) - (textScale / 2.0);
+
+        graphText->setLocation(QVector3D(-(graphText->width() * textScale) - 1.0, y, 0.0));
+//        graphText->setOrientation(QQuaternion::fromAxisAndAngle(0.0, 0.0, -1.0, 0));
+        graphText->setScale(QVector3D(textScale, textScale, 0.0));
+
+        graphText->init();
+        m_Children.append(graphText);
+    }
+
+    if(is3Dimensional()) {
+        labelIndex = 0;
+        labelCount = zLabels().count() - 1;
+        foreach(QString label, zLabels()) {
+            GraphText *graphText = new GraphText(this);
+            graphText->setText(label);
+
+            qreal z = ((boundingDepth / labelCount) * (labelIndex++)) - (textScale / 2.0);
+
+            graphText->setLocation(QVector3D(-1.0, 0.0, -z));
+            graphText->setOrientation(QQuaternion::fromAxisAndAngle(1.0, 0.0, 0.0, 90));
+            graphText->setScale(QVector3D(textScale, textScale, 0.0));
+
+            graphText->init();
+            m_Children.append(graphText);
+        }
+    }
+
+}
+
+QList<QString> GridLine::xLabels() const
+{
+    return m_XLabels;
+}
+
+void GridLine::setXLabels(const QList<QString> &xLabels)
+{
+    m_XLabels = xLabels;
+}
+
+QList<QString> GridLine::yLabels() const
+{
+    return m_YLabels;
+}
+
+void GridLine::setYLabels(const QList<QString> &yLabels)
+{
+    m_YLabels = yLabels;
+}
+
+QList<QString> GridLine::zLabels() const
+{
+    return m_ZLabels;
+}
+
+void GridLine::setZLabels(const QList<QString> &zLabels)
+{
+    m_ZLabels = zLabels;
+}

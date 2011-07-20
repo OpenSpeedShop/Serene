@@ -29,7 +29,7 @@
 #define GRAPHWIDGET2D_H
 
 #include "AbstractGraph/GraphWidget.h"
-#include "AbstractGraph/GridLine.h"
+#include "GridLine2D.h"
 
 class GraphWidget2D : public GraphWidget
 {
@@ -41,9 +41,7 @@ public:
 
 protected:
     virtual void init();
-
-private:
-    GridLine m_GridLine;
+    GridLine2D m_GridLine2D;
 };
 
 #endif // GRAPHWIDGET2D_H

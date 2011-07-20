@@ -25,26 +25,34 @@ SOURCES      += main.cpp\
                 MainWindow.cpp \
                 GraphView.cpp \
                 AbstractGraph/GridLine.cpp \
-                AbstractGraph/GraphWidget.cpp \
                 AbstractGraph/DataSeries.cpp \
                 AbstractGraph/GraphPrimitive.cpp \
                 Graph2D/GraphWidget2D.cpp \
                 Graph3D/GraphWidget3D.cpp \
                 LineGraph/LineDataSeries.cpp \
                 LineGraph/LineGraphWidget.cpp \
-    AbstractGraph/Camera.cpp
+    AbstractGraph/Camera.cpp \
+    AbstractGraph/GraphText.cpp \
+    Graph2D/GridLine2D.cpp \
+    AbstractGraph/GraphWidget.cpp \
+    AbstractGraph/BoundingCube.cpp \
+    AbstractGraph/BoundedPrimitive.cpp
 
 HEADERS      += MainWindow.h \
                 GraphView.h \
                 AbstractGraph/GridLine.h \
-                AbstractGraph/GraphWidget.h \
                 AbstractGraph/DataSeries.h \
                 AbstractGraph/GraphPrimitive.h \
                 Graph2D/GraphWidget2D.h \
                 Graph3D/GraphWidget3D.h \
                 LineGraph/LineDataSeries.h \
                 LineGraph/LineGraphWidget.h \
-    AbstractGraph/Camera.h
+    AbstractGraph/Camera.h \
+    AbstractGraph/GraphText.h \
+    Graph2D/GridLine2D.h \
+    AbstractGraph/GraphWidget.h \
+    AbstractGraph/BoundingCube.h \
+    AbstractGraph/BoundedPrimitive.h
 
 FORMS        += MainWindow.ui
 

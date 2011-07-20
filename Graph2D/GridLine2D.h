@@ -4,7 +4,7 @@
    \version
 
    \section LICENSE
-   This file is part of the Serene 3D Graphing Library
+   This file is part of the Open|SpeedShop Graphical User Interface
    Copyright (C) 2010-2011 Argo Navis Technologies, LLC
 
    This library is free software; you can redistribute it and/or modify it
@@ -25,25 +25,18 @@
 
  */
 
-#include "GraphWidget2D.h"
+#ifndef GRIDLINE2D_H
+#define GRIDLINE2D_H
 
-GraphWidget2D::GraphWidget2D(QWidget *parent) :
-    GraphWidget(parent)
+#include "AbstractGraph/GridLine.h"
+
+class GridLine2D : public GridLine
 {
-}
+    Q_OBJECT
+public:
+    explicit GridLine2D(QObject *parent = 0);
 
-bool GraphWidget2D::is3Dimensional()
-{
-    return true;
-}
+    virtual bool is3Dimensional();
+};
 
-void GraphWidget2D::init()
-{
-    GraphWidget::init();
-
-    m_GridLine2D.setBoundingCube(&m_BoundingCube);
-    m_GridLine2D.init();
-    if(!m_Primitives.contains(&m_GridLine2D)) {
-        m_Primitives.append(&m_GridLine2D);
-    }
-}
+#endif // GRIDLINE2D_H

@@ -28,18 +28,32 @@
 #ifndef GRIDLINE_H
 #define GRIDLINE_H
 
-#include <QObject>
-#include <QtOpenGL>
-#include "GraphPrimitive.h"
+#include "BoundedPrimitive.h"
 
 class GraphWidget;
 
-class GridLine : public GraphPrimitive
+class GridLine : public BoundedPrimitive
 {
     Q_OBJECT
 public:
     explicit GridLine(QObject *parent = 0);
+
+    virtual bool is3Dimensional();
     void init();
+
+    void buildTextLabels();
+    QList<QString> xLabels() const;
+    void setXLabels(const QList<QString> &xLabels);
+    QList<QString> yLabels() const;
+    void setYLabels(const QList<QString> &yLabels);
+    QList<QString> zLabels() const;
+    void setZLabels(const QList<QString> &zLabels);
+
+
+private:
+    QList<QString> m_XLabels;
+    QList<QString> m_YLabels;
+    QList<QString> m_ZLabels;
 };
 
 #endif // GRIDLINE_H

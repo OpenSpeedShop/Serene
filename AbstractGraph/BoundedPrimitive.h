@@ -4,7 +4,7 @@
    \version
 
    \section LICENSE
-   This file is part of the Serene 3D Graphing Library
+   This file is part of the Open|SpeedShop Graphical User Interface
    Copyright (C) 2010-2011 Argo Navis Technologies, LLC
 
    This library is free software; you can redistribute it and/or modify it
@@ -25,53 +25,30 @@
 
  */
 
-#ifndef GLWIDGET_H
-#define GLWIDGET_H
+#ifndef BOUNDEDPRIMITIVE_H
+#define BOUNDEDPRIMITIVE_H
 
-#include <QGLWidget>
-#include <QVector3D>
+#include <QObject>
+#include <QtOpenGL>
 #include "GraphPrimitive.h"
-#include "Camera.h"
 #include "BoundingCube.h"
 
-class GraphWidget : public QGLWidget
+class BoundedPrimitive : public GraphPrimitive
 {
     Q_OBJECT
 public:
-    explicit GraphWidget(QWidget *parent = 0);
-    ~GraphWidget();
+    explicit BoundedPrimitive(QObject *parent = 0);
 
-    QSize minimumSizeHint() const;
-    QSize sizeHint() const;
+    virtual BoundingCube *boundingCube() const;
+    virtual void setBoundingCube(BoundingCube *boundingCube);
 
-    virtual bool is3Dimensional();
-
-protected:
-    virtual void initializeGL();
-    virtual void paintGL();
-    virtual void resizeGL(int width, int height);
-
-    virtual void init();
-    virtual void paint();
-
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent *event);
-    virtual void wheelEvent(QWheelEvent *);
-
-    Camera m_Camera;
-    BoundingCube m_BoundingCube;
-    QList<GraphPrimitive *> m_Primitives;
-
-protected:
-    virtual bool event(QEvent *event);
-    virtual bool helpEvent(QHelpEvent * event);
-    virtual QPair<int, int> itemAt(QPoint position);
-
+protected slots:
+    virtual void setLocation();
+    virtual void setSize();
 
 private:
-    QPoint m_LastMousePosition;
-    QString m_ChartTitle;
+    BoundingCube *m_BoundingCube;
 
 };
 
-#endif // GLWIDGET_H
+#endif // BOUNDEDPRIMITIVE_H

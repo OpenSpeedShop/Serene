@@ -37,7 +37,8 @@
 #endif
 
 GraphWidget::GraphWidget(QWidget *parent) :
-    QGLWidget(parent)
+    QGLWidget(parent),
+    m_BoundingCube()
 {
 }
 
@@ -67,9 +68,14 @@ void GraphWidget::initializeGL()
     m_Camera.setHasPerspective(is3Dimensional());
     m_Camera.setFarPlane(500.0);
 
-    //TODO: Move the view to center and display the entire object
-    m_Camera.translateLocation(QVector3D(0.0, 0.0, -15.0));
-    m_Camera.translate(QVector3D(12.5, 5.0, 0.0));
+    // Move the view to center and display the entire object
+    m_Camera.translateLocation(QVector3D(0.0, 0.0, -100.0));
+    QVector3D cameraLocation = m_BoundingCube.size();
+    cameraLocation.setX(cameraLocation.x() / 2);
+    cameraLocation.setY(cameraLocation.y() / 2);
+    cameraLocation.setZ(0.0);
+    cameraLocation += m_BoundingCube.position();
+    m_Camera.translate(cameraLocation);
 
     connect(&m_Camera, SIGNAL(viewChanged()), this, SLOT(repaint()));
 
@@ -104,7 +110,12 @@ void GraphWidget::paint()
 void GraphWidget::resizeGL(int width, int height)
 {
     glViewport(0, 0, width, height);
-    m_Camera.setAspectRatio((double)width/(double)height);
+    double aspectRatio = (double)width / (double)height;
+
+    QVector3D size(100.0, 100.0 / aspectRatio, 100.0);
+    m_BoundingCube.setSize(size);
+
+    m_Camera.setAspectRatio(aspectRatio);
 }
 
 void GraphWidget::mousePressEvent(QMouseEvent *event)
@@ -130,7 +141,7 @@ void GraphWidget::mouseMoveEvent(QMouseEvent *event)
                     event->buttons() == Qt::MidButton &&        // Everybody else does
 #endif
                     event->modifiers() == Qt::NoModifier) {
-                m_Camera.rotateAboutCenter(delta.y(), delta.x(), 0.0);
+                m_Camera.rotateAboutCenter(delta.x(), delta.y(), 0.0);
 
             } else if(event->buttons() == Qt::MidButton &&
                       event->modifiers() == Qt::ControlModifier) {
@@ -149,15 +160,121 @@ void GraphWidget::mouseMoveEvent(QMouseEvent *event)
 
 void GraphWidget::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() == Qt::Vertical &&
-            event->modifiers() == Qt::NoModifier) {
+    if (event->orientation() == Qt::Vertical && event->modifiers() == Qt::NoModifier) {
         float numSteps = event->delta() / 120.0f;
         if((m_Camera.distance() - 1) < numSteps) {      // Don't get too close to the object
             numSteps = m_Camera.distance() - 1;
         }
-
         m_Camera.translateLocation(QVector3D(0.0, 0.0, numSteps));
     }
 
     QGLWidget::wheelEvent(event);
 }
+
+bool GraphWidget::event(QEvent *event)
+{
+    if(event->type() == QEvent::ToolTip) {
+        return helpEvent((QHelpEvent *)event);
+    } else {
+        return QGLWidget::event(event);
+    }
+}
+
+bool GraphWidget::helpEvent(QHelpEvent * event)
+{
+    if(event != NULL) {
+        QPair<int,int> dataCell = itemAt(event->pos());
+        if(dataCell.first > -1 && dataCell.second > -1) {
+            QToolTip::showText(event->globalPos(), QString("Column: %1 Row: %2").arg(dataCell.first).arg(dataCell.second), this);
+        } else if(dataCell.first > -1) {
+            QToolTip::showText(event->globalPos(), QString("Column: %1").arg(dataCell.first), this);
+        } else {
+            QToolTip::hideText();
+        }
+        return true;
+    }
+
+    return QGLWidget::event(event);
+}
+
+
+QPair<int, int> GraphWidget::itemAt(QPoint position)
+{
+    // Set up the selection buffer
+    int count = 512;
+    GLuint buffer[count];
+    for(int i=0; i<count; ++i) buffer[i] = 0;
+    glSelectBuffer(count, buffer);
+
+    // Initialize the names and render mode
+    glInitNames();
+    glRenderMode(GL_SELECT);
+
+    // Get the current projection matrix
+    GLdouble projectionMatrix[16];
+    glGetDoublev( GL_PROJECTION_MATRIX, projectionMatrix );
+
+    // Get the current viewport
+    GLint viewport[4];
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // Preserve the projection matrix (we don't calculate it every frame)
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+
+    // Set up a projection several pixels wide around the point
+    glLoadIdentity();
+    gluPickMatrix((GLdouble)position.x(), (GLdouble)(viewport[3] - position.y()), 5.0, 5.0, viewport);
+    glMultMatrixd(projectionMatrix);
+
+    // Do the pick render
+    glMatrixMode(GL_MODELVIEW);
+    foreach(GraphPrimitive *primitive, m_Primitives) {
+        primitive->pick();
+    }
+
+    // Bring back the original projection matrix
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+
+    // Get the number of hits for the location
+    glFlush();
+    GLint hits = glRenderMode(GL_RENDER);
+
+//    // Output the debugging information for the returned buffer
+//    QString bufferText("{");
+//    for(int i = 0; i < 128; ++i) {
+//        bufferText.append(QString("%1;").arg(buffer[i]));
+//    }
+//    bufferText.append("}");
+//    qDebug() << bufferText;
+
+    // Find the nearest object and return it's name
+    GLuint lastZ = 0xFFFFFFFF;
+    GLuint column = -1;
+    GLuint row = -1;
+    GLuint *ptr = buffer;
+    for(int i = 0; i < hits; ++i) {
+        GLuint names = *ptr;
+        ptr++;
+        GLuint nearZ = *ptr;
+        ptr += 2;
+
+        if(nearZ <= lastZ) {
+            lastZ = nearZ;
+            for(int j = 0; j < names; ++j) {
+                if(j == 0) {
+                    column = *ptr;
+                } else {
+                    row = *ptr;
+                }
+                ++ptr;
+            }
+        } else {
+            ptr += names;
+        }
+    }
+
+    return QPair<int, int>(column, row);
+}
+
