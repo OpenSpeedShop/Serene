@@ -15,16 +15,22 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-TEMPLATE      = subdirs
+include(../Serene.pri)
 
-SUBDIRS       = lib \
-                test
+TEMPLATE      = app
 
-test.subdir   = test
-test.depends  = lib
+TARGET        = $${LIBRARY_TARGET}Test
+win32:target.path = /
+else:target.path = /bin
+INSTALLS += target
 
-lib.subdir    = lib
+SOURCES      += main.cpp \
+                MainWindow.cpp
 
-OTHER_FILES  += README \
-                LICENSE \
-                COPYRIGHT
+HEADERS      += MainWindow.h
+
+FORMS        += MainWindow.ui
+
+LIBS         += -L$$quote($${BUILD_PATH}/lib/$${POSTFIX}) -lSerene
+INCLUDEPATH  += $$quote($${SOURCE_PATH}/lib)
+DEPENDPATH   += $$quote($${SOURCE_PATH}/lib)

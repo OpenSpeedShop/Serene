@@ -15,16 +15,22 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-TEMPLATE      = subdirs
+QT += core gui opengl
+LIBRARY_TARGET = Serene
 
-SUBDIRS       = lib \
-                test
+#################
+# INSTALL PATHS #
+#################
+!isEmpty($${SOURCEDIR}): SOURCE_PATH = $${SOURCEDIR}
+isEmpty(SOURCE_PATH): SOURCE_PATH = $$quote($${PWD})
 
-test.subdir   = test
-test.depends  = lib
+!isEmpty($${BUILDDIR}): BUILD_PATH = $${BUILDDIR}
+isEmpty(BUILD_PATH): BUILD_PATH = $$quote($${PWD})
 
-lib.subdir    = lib
-
-OTHER_FILES  += README \
-                LICENSE \
-                COPYRIGHT
+#########################
+# DEBUG/RELEASE POSTFIX #
+#########################
+win32 {
+  CONFIG(debug, debug|release): POSTFIX = $$quote(debug)
+  else: POSTFIX = $$quote(release)
+}
