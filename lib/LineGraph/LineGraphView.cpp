@@ -126,13 +126,17 @@ void LineGraphView::updateGraph()
     QAbstractItemModel *model = this->model();
     int columnCount = model->columnCount();
     for(int i=0; i < columnCount; ++i) {
-        if(i == (columnCount - 1)) {
+
+        //TODO: This needs to be a settable column and rowCount
+        if(i == (columnCount - 1) && model->rowCount() <= 10) {
+            // Add labels to the bottom axis
             QList<QString> titles;
             for(int j=0; j < model->rowCount(); ++j) {
                 QModelIndex index = model->index(j, i);
                 titles.append(index.data().toString());
             }
             m_LineGraphWidget->setXLabels(titles);
+
         } else {
             QList<QVariant> data;
             for(int j=0; j < model->rowCount(); ++j) {
@@ -169,13 +173,26 @@ bool LineGraphView::helpEvent(QHelpEvent * event)
 
             if(dataCell.first >= 0 && dataCell.second >= 0) {
                 QAbstractItemModel *model = this->model();
-                QString toolTip = model->index(dataCell.second, dataCell.first).data().toString();
+
+                qDebug() << model->rowCount();
+
+                //TODO: This needs to be a settable column and rowCount
+                QString toolTip;
+                if(model->rowCount() <= 10) {
+                    toolTip = model->index(dataCell.second, dataCell.first).data().toString();
+                } else {
+                    toolTip = QString("%1: %2")
+                                .arg(model->index(dataCell.second, model->columnCount() - 1).data().toString())
+                                .arg(model->index(dataCell.second, dataCell.first).data().toString());
+                }
+
                 QToolTip::showText(event->globalPos(), toolTip, this);
 
-            } else if(dataCell.first >= 0 && dataCell.second < 0) {
-                QAbstractItemModel *model = this->model();
-                QString toolTip = model->headerData(dataCell.first, Qt::Horizontal).toString();
-                QToolTip::showText(event->globalPos(), toolTip, this);
+            // We've got just the line
+//            } else if(dataCell.first >= 0 && dataCell.second < 0) {
+//                QAbstractItemModel *model = this->model();
+//                QString toolTip = model->headerData(dataCell.first, Qt::Horizontal).toString();
+//                QToolTip::showText(event->globalPos(), toolTip, this);
 
             } else {
                 QToolTip::hideText();
