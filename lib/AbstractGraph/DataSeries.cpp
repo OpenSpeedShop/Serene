@@ -66,7 +66,7 @@ void DataSeries::setData(const QList<QVariant> &data)
 void DataSeries::randomizeData(int points)
 {
     QList<QVariant> randomData;
-    qsrand(QDateTime::currentMSecsSinceEpoch() * column());
+    qsrand((uint)QDateTime::currentDateTime().time().second() * column());
     for(int index = 0; index < points; ++index) {
         randomData.append(QVariant((qreal)qrand()));
     }

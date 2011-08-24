@@ -15,6 +15,36 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
+!isEmpty(SERENE_PRI_INCLUDED): error("Serene.pri already included")
+SERENE_PRI_INCLUDED = 1
+
+##################
+# QT INFORMATION #
+##################
+defineTest(qtVer) {
+    isEqual(QT_MAJOR_VERSION, $$1) {
+        isEqual(QT_MINOR_VERSION, $$2) {
+            isEqual(QT_PATCH_VERSION, $$3) : return(true)
+            greaterThan(QT_PATCH_VERSION, $$3) : return(true)
+        }
+        greaterThan(QT_MINOR_VERSION, $$2) : return(true)
+    }
+    return(false)
+}
+!qtVer(4,6,0): error(This application requires at least Qt version 4.6.0)
+
+#######################
+# VERSION INFORMATION #
+#######################
+#VER_MAJ      = 0
+#VER_MIN      = 1
+#VER_PAT      = 0
+#VERSION      = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
+#DEFINES     += VER_MAJ VER_MIN VER_PAT VERSION
+
+#####################
+# QMAKE INFORMATION #
+#####################
 QT += core gui opengl
 LIBRARY_TARGET = Serene
 
