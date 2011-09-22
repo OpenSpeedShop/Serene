@@ -88,6 +88,16 @@ void GraphWidget::init()
 {
     glEnable(GL_CULL_FACE);
 
+
+    /* Enable anti-aliasing for lines and points */
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_POINT_SMOOTH);
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+
     m_GridLine.setBoundingCube(&m_BoundingCube);
     m_GridLine.setHasPerspective(is3Dimensional());
     m_GridLine.init();

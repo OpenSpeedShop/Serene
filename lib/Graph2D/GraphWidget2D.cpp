@@ -36,8 +36,11 @@ GraphWidget2D::GraphWidget2D(QWidget *parent) :
 
 bool GraphWidget2D::is3Dimensional()
 {
-//    return false;
+#ifdef QT_DEBUG
     return true;
+#else
+    return false;
+#endif
 }
 
 } // namespace Serene

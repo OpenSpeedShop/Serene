@@ -69,7 +69,9 @@ void LineDataSeries::init()
         }
 
         if(!okay) {
+#ifdef QT_DEBUG
             qWarning("Datapoint not an expected data type");
+#endif
             continue;
         }
 
@@ -132,7 +134,9 @@ void LineDataSeries::pickRender()
         }
 
         if(!okay) {
+#ifdef QT_DEBUG
             qWarning("Datapoint not an expected data type");
+#endif
             continue;
         }
 
@@ -155,7 +159,7 @@ void LineDataSeries::pickRender()
     glEnd();
 
     int index = 0;
-    glPointSize(7.5f);
+    glPointSize(17.5f);
     foreach(QVector3D point, points) {
         glPushName(index++);
         glBegin(GL_POINTS);
