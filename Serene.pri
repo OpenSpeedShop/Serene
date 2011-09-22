@@ -36,31 +36,46 @@ defineTest(qtVer) {
 #######################
 # VERSION INFORMATION #
 #######################
-#VER_MAJ      = 0
-#VER_MIN      = 1
-#VER_PAT      = 0
-#VERSION      = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
-#DEFINES     += VER_MAJ VER_MIN VER_PAT VERSION
+VER_MAJ      = 0
+VER_MIN      = 1
+VER_PAT      = 0
+VERSION      = $${VER_MAJ}.$${VER_MIN}.$${VER_PAT}
+DEFINES     += VER_MAJ VER_MIN VER_PAT VERSION
 
 #####################
 # QMAKE INFORMATION #
 #####################
+CONFIG -= debug_and_release
 QT += core gui opengl
+
 LIBRARY_TARGET = Serene
 
 #################
 # INSTALL PATHS #
 #################
-!isEmpty($${SOURCEDIR}): SOURCE_PATH = $${SOURCEDIR}
+!isEmpty(SOURCEDIR): SOURCE_PATH = $${SOURCEDIR}
 isEmpty(SOURCE_PATH): SOURCE_PATH = $$quote($${PWD})
 
-!isEmpty($${BUILDDIR}): BUILD_PATH = $${BUILDDIR}
+!isEmpty(BUILDDIR): BUILD_PATH = $${BUILDDIR}
 isEmpty(BUILD_PATH): BUILD_PATH = $$quote($${PWD})
 
 #########################
 # DEBUG/RELEASE POSTFIX #
 #########################
-win32 {
-  CONFIG(debug, debug|release): POSTFIX = $$quote(debug)
-  else: POSTFIX = $$quote(release)
+CONFIG(debug_and_release) {
+  CONFIG(debug, debug|release) {
+    DIR_POSTFIX = debug
+  } else {
+    DIR_POSTFIX = release
+  }
 }
+
+CONFIG(debug, debug|release) {
+  win32: LIB_POSTFIX = D$${VER_MAJ}
+  else: LIB_POSTFIX = D
+} else {
+  win32: LIB_POSTFIX = $${VER_MAJ}
+  else: LIB_POSTFIX =
+}
+
+

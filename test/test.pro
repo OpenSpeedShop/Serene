@@ -17,20 +17,26 @@
 
 include(../Serene.pri)
 
-TEMPLATE      = app
+TEMPLATE          = app
 
-TARGET        = $${LIBRARY_TARGET}Test
+CONFIG(debug, debug|release) {
+  TARGET          = $${LIBRARY_TARGET}TestD
+} else {
+  TARGET          = $${LIBRARY_TARGET}Test
+}
+
 win32:target.path = /
-else:target.path = /bin
-INSTALLS += target
+else:target.path  = /bin
+INSTALLS         += target
 
-SOURCES      += main.cpp \
-                MainWindow.cpp
+SOURCES          += main.cpp \
+                    MainWindow.cpp
 
-HEADERS      += MainWindow.h
+HEADERS          += MainWindow.h
 
-FORMS        += MainWindow.ui
+FORMS            += MainWindow.ui
 
-LIBS         += -L$$quote($${BUILD_PATH}/lib/$${POSTFIX}) -lSerene
-INCLUDEPATH  += $$quote($${SOURCE_PATH}/lib)
-DEPENDPATH   += $$quote($${SOURCE_PATH}/lib)
+LIBS             += -L$$quote($${BUILD_PATH}/lib/$${DIR_POSTFIX}) -lSerene$${LIB_POSTFIX}
+
+INCLUDEPATH      += $$quote($${SOURCE_PATH}/lib)
+DEPENDPATH       += $$quote($${SOURCE_PATH}/lib)

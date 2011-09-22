@@ -19,7 +19,12 @@ include(../Serene.pri)
 
 TEMPLATE          = lib
 
-TARGET            = $$LIBRARY_TARGET
+CONFIG(debug, debug|release) {
+  TARGET          = $${LIBRARY_TARGET}D
+} else {
+  TARGET          = $${LIBRARY_TARGET}
+}
+
 win32:target.path = /
 else:target.path  = /lib
 INSTALLS         += target
